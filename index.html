@@ -170,6 +170,12 @@
     content:""; flex:1; height:2px;
     background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
   }
+  .category-hint{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:8px 0 0;
+    font-style:italic;
+  }
 
   .item-grid{
     display:grid;
@@ -190,6 +196,24 @@
     align-items:center;
     justify-content:space-between;
     gap:10px;
+    transition:opacity .2s, filter .2s;
+  }
+  .item-card.out-of-stock{
+    opacity:0.5;
+    filter:grayscale(65%);
+  }
+  .sold-out-label{
+    display:inline-block;
+    font-family:'Space Mono', monospace;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.03em;
+    color:var(--ink-soft);
+    background:var(--paper);
+    border:1.5px solid var(--ink-soft);
+    border-radius:8px;
+    padding:8px 12px;
+    white-space:nowrap;
   }
   .item-info .name{
     font-weight:600;
@@ -499,6 +523,34 @@
     border-bottom:1px dashed var(--line);
     cursor:pointer;
   }
+  .sauce-option.disabled-option{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+  .sauce-option.disabled-option input{ cursor:not-allowed; }
+  .multi-pick-row{
+    justify-content:space-between;
+    cursor:default;
+  }
+  .multi-pick-ctrl{
+    display:flex; align-items:center; gap:10px;
+    flex:0 0 auto;
+  }
+  .multi-pick-count{
+    min-width:16px;
+    text-align:center;
+    font-family:'Space Mono', monospace;
+    font-weight:700;
+    font-size:14px;
+  }
+  .multi-pick-row .qty-btn{
+    width:28px; height:28px;
+    font-size:15px;
+  }
+  .multi-pick-row .qty-btn:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
   .sauce-option input[type="checkbox"], .sauce-option input[type="radio"]{
     width:19px; height:19px;
     accent-color:var(--jam);
@@ -711,10 +763,85 @@
 </footer>
 
 <script>
-const MENU = {"groups":[{"name":"Breakfast","items":[{"sku":"STD-BREAKF001","name":"Standard Breakfast","price":50.0,"description":"2 Eggs, 2 Bacon Rashers, Slice of Toast & Tomato"},{"sku":"MEGA-BREAKF001","name":"Mega Breakfast","price":69.0,"description":"2 Eggs, 2 Bacon Rashers, 2 Slices of Toast, Tomato, Viennas & Chips"}]},{"name":"Toasties","items":[{"sku":"TST-001","name":"Toasted Cheese","price":29.0},{"sku":"TOCT001","name":"Toasted Cheese & Tomato","price":32.0},{"sku":"TST-002","name":"Toasted Bacon and Cheese","price":40.0},{"sku":"TST-003","name":"Toasted Bacon and Egg","price":40.0},{"sku":"TST-006","name":"Toasted Burger","price":47.0},{"sku":"TST-004","name":"Toasted Bacon, Egg and Cheese","price":44.0},{"sku":"TST-005","name":"Toasted Chicken Mayo","price":42.0},{"sku":"TOASECT001","name":"Toasted Bacon, Egg, Cheese Tomato","price":45.0}]},{"name":"Burgers & Rolls","items":[{"sku":"BGR-001","name":"Plain Burger","price":45.0},{"sku":"BGR-007","name":"Bacon & Egg & Cheese Burger with Chips","price":78.0},{"sku":"BGR-006","name":"Bacon Cheese Burger with Chips","price":68.0},{"sku":"BGR-002","name":"Burger and Chips","price":60.0},{"sku":"BGR-003","name":"Burger and Egg","price":46.0},{"sku":"BGR-004","name":"Cheese Burger","price":46.0},{"sku":"BGR-005","name":"Cheese Burger with Chips","price":65.0},{"sku":"CHIB+C001","name":"Chicken Burger and Chips","price":60.0},{"sku":"CHIDD001","name":"Chicken Fillet Burger Double","price":75.0},{"sku":"GAT-001","name":"Vienna, Chips Roll","price":42.0}]},{"name":"Gatsby's","items":[{"sku":"GAT-003","name":"Gatsby Half Vienna","price":58.0,"description":"Viennas, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-005","name":"Gatsby Half Chicken","price":75.0,"description":"Chicken, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-007","name":"Gatsby Half Full House","price":98.0,"description":"Chicken, Eggs, Cheese, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-002","name":"Gatsby Full Vienna","price":105.0,"description":"Viennas, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-004","name":"Gatsby Full Chicken","price":125.0,"description":"Chicken, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-006","name":"Gatsby Full House Chicken","price":170.0,"description":"Chicken, Eggs, Cheese, Lettuce, Tomato, Onions & Chips"}]},{"name":"Hot Chips","items":[{"sku":"CHP-001","name":"Hot Chips Small","price":29.0},{"sku":"PIE-010","name":"Chip Roll","price":32.0},{"sku":"CHP-002","name":"Hot Chips Large","price":60.0},{"sku":"3454839","name":"Vienna X2 and Chips","price":44.0},{"sku":"3454841","name":"Vienna X3 and Chips","price":50.0},{"sku":"3454842","name":"Vienna X4 and Chips","price":56.0},{"sku":"3454843","name":"Vienna X3 and Chips & Switch Cool Drink","price":60.0}]},{"name":"Pies","items":[{"sku":"SAM001","name":"Samoosa","price":10.0},{"sku":"3439978","name":"Samosa Special 4x","price":30.0},{"sku":"PIE-009","name":"Chicken and Mushroom Pie","price":29.0},{"sku":"PIE-008","name":"Chicken Mayo Pie","price":29.0},{"sku":"PIE-019","name":"Pepper Steak Pie","price":29.0},{"sku":"PIE-020","name":"Steak & Kidney Pie","price":29.0},{"sku":"PIE-024","name":"Biltong and Cheese","price":29.0},{"sku":"PIE-025","name":"Beef Rib","price":29.0},{"sku":"3172362","name":"Regular Pie Special","price":49.0}]},{"name":"Cold Drinks","items":[{"sku":"SDR-005","name":"Cold Drink (500ml)","price":14.0},{"sku":"COLDD+R001","name":"Cold Drink (500ml) + Return","price":12.0},{"sku":"ENG-001","name":"Switch Energy Drink - (500ml)","price":12.0},{"sku":"HLT-001","name":"Score  (500ml)","price":12.0},{"sku":"ENG-007","name":"Reboost Energy - (500ml)","price":12.0},{"sku":"MONE","name":"Monster Energy","price":20.0},{"sku":"FG-600ML-FLAV","name":"600ml Cape Aqua","price":10.0},{"sku":"FG-600ML-CA-ST","name":"600ml Cape Aqua Still","price":10.0},{"sku":"FG-1L-CA-ST","name":"1L Cape Aqua Still","price":14.0},{"sku":"SDR-006","name":"Coca-Cola - Original Taste (300ml)","price":10.0},{"sku":"SDR-001","name":"Cold Drink (440ml)","price":17.0},{"sku":"SDR-004","name":"Cold Drink (1L)","price":20.0},{"sku":"SDR-003","name":"Cold Drink  (2L)","price":35.0},{"sku":"COOLDRINKCAN001","name":"Cool Drink Can 500ml","price":15.0},{"sku":"JUC-003","name":"Cappy Still - (500ml)","price":15.0},{"sku":"SPT-001","name":"Powerade - (500ml)","price":18.0}]},{"name":"Sweets & Snacks","items":[{"sku":"SNK-004","name":"Spookies - (150g)","price":5.0},{"sku":"SNK-014","name":"Paaper Bites - (75g)","price":10.0},{"sku":"SNK-001","name":"Nik Naks - Original Cheese (20g)","price":2.0},{"sku":"SNK-012","name":"Truda Flyers","price":2.0},{"sku":"3369717","name":"Cashew Nuts 100g","price":44.0},{"sku":"3369718","name":"Choc Peanuts 100g","price":20.0},{"sku":"CRACKLES","name":"Crackles","price":12.0},{"sku":"3369724","name":"Peanuts Medium 100g","price":16.0},{"sku":"3369726","name":"Peanuts Pink N White 100g","price":22.0},{"sku":"3369728","name":"Peanuts Red Sugared 100g","price":22.0},{"sku":"3369729","name":"Popcorn 100g","price":20.0},{"sku":"3369722","name":"Fruit Lollies","price":20.0}]},{"name":"Baked Goods","items":[{"sku":"BL001","name":"Banana Loaf","price":24.0},{"sku":"ML001","name":"Marble Loaf","price":24.0},{"sku":"CL001","name":"Carrot Loaf","price":27.0},{"sku":"BR003","name":"Brownie Bites (150g)","price":20.0},{"sku":"BR001","name":"Brownie Loose","price":14.0},{"sku":"BR002","name":"Brownie Skillet (5 in A Pack)","price":39.0},{"sku":"PS001","name":"Plain Scones (3 in A Pack)","price":15.0},{"sku":"PS002","name":"Plain Scones (6 in A Pack)","price":30.0},{"sku":"CCS001","name":"Choc Chip Scones (3 in A Pack)","price":16.0},{"sku":"SJR001","name":"Swiss Jam Roll","price":30.0},{"sku":"CSR001","name":"Chocolate Swiss Roll","price":30.0},{"sku":"SJR002","name":"Mini Caramel Swiss Roll","price":30.0},{"sku":"MM001","name":"Melting Moments (7 in A Pack)","price":27.0},{"sku":"SB001","name":"Short Bread (7 in A Pack)","price":27.0},{"sku":"PDN001","name":"Pastéis de Nata (6 pack Frozen)","price":60.0},{"sku":"RUS001","name":"Rusks","price":20.0},{"sku":"SP001","name":"Sweetie Pie (4 in A Pack)","price":20.0},{"sku":"ROLL-01","name":"Single Roll","price":3.5},{"sku":"ROLL-02","name":"6 pack Rolls","price":20.0},{"sku":"MC001","name":"Milk Cups","price":15.0},{"sku":"CC001","name":"Chocolate Croissants","price":11.0}]},{"name":"Muffins","items":[{"sku":"MUF009","name":"Single Muffins - Banana","price":5.0},{"sku":"MUF002","name":"Single Muffins - Blueberry","price":5.0},{"sku":"MUF005","name":"Single Muffins - Bran & Fruit","price":5.0},{"sku":"MUF006","name":"Single Muffins - Cappuccino","price":5.0},{"sku":"MUF008","name":"Single Muffins - Carrot","price":5.0},{"sku":"MUF004","name":"Single Muffins - Choc Banana","price":5.0},{"sku":"MUF001","name":"Single Muffins - Choc Chip","price":5.0},{"sku":"MUF003","name":"Single Muffins - Choc Vanilla","price":5.0},{"sku":"MUF029","name":"Single Muffins - Chocolate","price":5.0},{"sku":"MUF007","name":"Single Muffins - Orange","price":5.0},{"sku":"MUF030","name":"Single Muffins - Vanilla","price":5.0},{"sku":"MUF018","name":"2 pack Muffins - Banana","price":10.0},{"sku":"MUF011","name":"2 pack Muffins - Blueberry","price":10.0},{"sku":"MUF014","name":"2 pack Muffins - Bran & Fruit","price":10.0},{"sku":"MUF015","name":"2 pack Muffins - Cappuccino","price":10.0},{"sku":"MUF017","name":"2 pack Muffins - Carrot","price":10.0},{"sku":"MUF013","name":"2 pack Muffins - Choc Banana","price":10.0},{"sku":"MUF010","name":"2 pack Muffins - Choc Chip","price":10.0},{"sku":"MUF012","name":"2 pack Muffins - Choc Vanilla","price":10.0},{"sku":"MUF033","name":"2 pack Muffins - Chocolate","price":10.0},{"sku":"MUF035","name":"2 pack Muffins - Marble","price":10.0},{"sku":"MUF016","name":"2 pack Muffins - Orange","price":10.0},{"sku":"MUF034","name":"2 pack Muffins - Vanilla","price":10.0},{"sku":"MUF026","name":"3 pack Muffins - Banana","price":15.0},{"sku":"MUF020","name":"3 pack Muffins - Blueberry","price":15.0},{"sku":"MUF027","name":"3 pack Muffins - Bran & Fruit","price":15.0},{"sku":"MUF023","name":"3 pack Muffins - Cappuccino","price":15.0},{"sku":"MUF025","name":"3 pack Muffins - Carrot","price":15.0},{"sku":"MUF022","name":"3 pack Muffins - Choc Banana","price":15.0},{"sku":"MUF019","name":"3 pack Muffins - Choc Chip","price":15.0},{"sku":"MUF021","name":"3 pack Muffins - Choc Vanilla","price":15.0},{"sku":"MUF031","name":"3 pack Muffins - Chocolate","price":15.0},{"sku":"MUF028","name":"3 pack Muffins - Marble","price":15.0},{"sku":"MUF024","name":"3 pack Muffins - Orange","price":15.0},{"sku":"MUF032","name":"3 pack Muffins - Vanilla","price":15.0},{"sku":"MUFX001","name":"3 Pack - Mix Muffins","price":15.0},{"sku":"MUV002","name":"Muffin Value pack (10 in A Pack) - Chocolate","price":35.0},{"sku":"MUV001","name":"Muffin Value pack (10 in A Pack) - Vanilla","price":35.0},{"sku":"MIX001","name":"2 pack Muffins - Mix Muffins","price":8.0},{"sku":"JMU009","name":"Jumbo Muffins - Banana","price":12.0},{"sku":"JMU002","name":"Jumbo Muffins - Blueberry","price":12.0},{"sku":"JMU005","name":"Jumbo Muffins - Bran & Fruit","price":12.0},{"sku":"JMU006","name":"Jumbo Muffins - Cappuccino","price":12.0},{"sku":"JMU008","name":"Jumbo Muffins - Carrot","price":12.0},{"sku":"JMU004","name":"Jumbo Muffins - Choc Banana","price":12.0},{"sku":"JMU001","name":"Jumbo Muffins - Choc Chip","price":12.0},{"sku":"JMU003","name":"Jumbo Muffins - Choc Vanilla","price":12.0},{"sku":"JMU010","name":"Jumbo Muffins - Chocolate","price":12.0},{"sku":"JMU041","name":"Jumbo Muffins - Marble","price":12.0},{"sku":"JMU007","name":"Jumbo Muffins - Orange","price":12.0}]},{"name":"Cakes & Treats","items":[{"sku":"SWISSRL","name":"Swiss Roll Logs","price":17.0},{"sku":"ECLLOG001","name":"Eclair Log","price":18.0},{"sku":"CHOCEC001","name":"Choc Eclairs - single","price":12.0},{"sku":"LAM-SIN","name":"Lamington - Single","price":8.0},{"sku":"LAMRS","name":"Lamington Raspberry (skillet)","price":30.0},{"sku":"LAMCS","name":"Lamington Chocolate (skillet)","price":30.0},{"sku":"SNOWBC001","name":"Snowball with Cream","price":10.0},{"sku":"3433214","name":"Nimbles","price":10.0}]},{"name":"Biscuits","items":[{"sku":"DB001","name":"Dipped Biscuit - Choc","price":27.0},{"sku":"DB002","name":"Dipped Biscuit - White","price":27.0},{"sku":"BIS001","name":"200g Biscuits - Choc Chip","price":17.0},{"sku":"BIS002","name":"200g Biscuits - Choc Chip Shortbread","price":17.0},{"sku":"BIS005","name":"200g Biscuits - Crunchie","price":17.0},{"sku":"BIS004","name":"200g Biscuits - Ginger","price":17.0},{"sku":"BIS003","name":"200g Biscuits - Shortbread","price":17.0},{"sku":"BIS007","name":"500g Biscuits - Choc Chip","price":35.0},{"sku":"BIS008","name":"500g Biscuits - Choc Chip Shortbread","price":35.0},{"sku":"BIS011","name":"500g Biscuits - Crunchie","price":35.0},{"sku":"BIS010","name":"500g Biscuits - Ginger","price":35.0},{"sku":"BIS009","name":"500g Biscuits - Shortbread","price":35.0},{"sku":"BIS013","name":"1Kg Biscuits - Choc Chip","price":65.0},{"sku":"BIS014","name":"1Kg Biscuits - Choc Chip Shortbread","price":65.0},{"sku":"BIS016","name":"1Kg Biscuits - Ginger","price":65.0},{"sku":"BIS015","name":"1Kg Biscuits - Shortbread","price":65.0},{"sku":"BIS018","name":"1kg Biscuits - Coconut Choc","price":65.0},{"sku":"BIS017","name":"1kg Biscuits - Crunchie","price":65.0}]},{"name":"Meds","items":[{"sku":"OTH-002","name":"Grand-Pa Headache Powders (Sachet)","price":4.0}]}]}
+const MENU = {"groups":[{"name":"Breakfast","items":[{"sku":"STD-BREAKF001","name":"Standard Breakfast","price":50.0,"description":"2 Eggs, 2 Bacon Rashers, Slice of Toast & Tomato"},{"sku":"MEGA-BREAKF001","name":"Mega Breakfast","price":69.0,"description":"2 Eggs, 2 Bacon Rashers, 2 Slices of Toast, Tomato, Viennas & Chips"}]},{"name":"Toasties","items":[{"sku":"TST-001","name":"Toasted Cheese","price":29.0},{"sku":"TOCT001","name":"Toasted Cheese & Tomato","price":32.0},{"sku":"TST-002","name":"Toasted Bacon and Cheese","price":40.0},{"sku":"TST-003","name":"Toasted Bacon and Egg","price":40.0},{"sku":"TST-006","name":"Toasted Burger","price":47.0},{"sku":"TST-004","name":"Toasted Bacon, Egg and Cheese","price":44.0},{"sku":"TST-005","name":"Toasted Chicken Mayo","price":42.0},{"sku":"TOASECT001","name":"Toasted Bacon, Egg, Cheese Tomato","price":45.0}]},{"name":"Burgers & Rolls","items":[{"sku":"BGR-001","name":"Plain Burger","price":45.0},{"sku":"BGR-007","name":"Bacon & Egg & Cheese Burger with Chips","price":78.0},{"sku":"BGR-006","name":"Bacon Cheese Burger with Chips","price":68.0},{"sku":"BGR-002","name":"Burger and Chips","price":60.0},{"sku":"BGR-003","name":"Burger and Egg","price":46.0},{"sku":"BGR-004","name":"Cheese Burger","price":46.0},{"sku":"BGR-005","name":"Cheese Burger with Chips","price":65.0},{"sku":"CHIB+C001","name":"Chicken Burger and Chips","price":60.0},{"sku":"CHIDD001","name":"Chicken Fillet Burger Double","price":75.0},{"sku":"GAT-001","name":"Vienna, Chips Roll","price":42.0}]},{"name":"Gatsby's","items":[{"sku":"GAT-003","name":"Gatsby Half Vienna","price":58.0,"description":"Viennas, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-005","name":"Gatsby Half Chicken","price":75.0,"description":"Chicken, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-007","name":"Gatsby Half Full House","price":98.0,"description":"Chicken, Eggs, Cheese, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-002","name":"Gatsby Full Vienna","price":105.0,"description":"Viennas, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-004","name":"Gatsby Full Chicken","price":125.0,"description":"Chicken, Lettuce, Tomato, Onions & Chips"},{"sku":"GAT-006","name":"Gatsby Full House Chicken","price":170.0,"description":"Chicken, Eggs, Cheese, Lettuce, Tomato, Onions & Chips"}]},{"name":"Hot Chips","items":[{"sku":"CHP-001","name":"Hot Chips Small","price":29.0},{"sku":"PIE-010","name":"Chip Roll","price":32.0},{"sku":"CHP-002","name":"Hot Chips Large","price":60.0},{"sku":"3454839","name":"Vienna X2 and Chips","price":44.0},{"sku":"3454841","name":"Vienna X3 and Chips","price":50.0},{"sku":"3454842","name":"Vienna X4 and Chips","price":56.0},{"sku":"3454843","name":"Vienna X3 and Chips & Switch Cool Drink","price":60.0}]},{"name":"Pies and Samoosa's","items":[{"sku":"SAM001","name":"Samoosa","price":10.0},{"sku":"3439978","name":"Samoosa Special x4","price":30.0},{"sku":"PIE-009","name":"Chicken and Mushroom Pie","price":29.0},{"sku":"PIE-008","name":"Chicken Mayo Pie","price":29.0},{"sku":"PIE-019","name":"Pepper Steak Pie","price":29.0},{"sku":"PIE-020","name":"Steak & Kidney Pie","price":29.0},{"sku":"PIE-024","name":"Biltong and Cheese","price":29.0},{"sku":"PIE-025","name":"Beef Rib","price":29.0},{"sku":"3172362","name":"Regular Pie Special","price":49.0}]},{"name":"Cold Drinks","items":[{"sku":"SDR-005","name":"Coca-Cola, Fanta & Stoney (500ml)","price":14.0},{"sku":"HLT-001","name":"Score Original (Guarana Energy)","price":12.0},{"sku":"ENG-007","name":"Reboost Energy Original","price":12.0},{"sku":"ENG-CANS-001","name":"Switch Energy (Cans)","price":12.0},{"sku":"MONE","name":"Monster Energy","price":20.0},{"sku":"FG-600ML-FLAV","name":"Cape Aqua Flavoured Water 600ml","price":10.0},{"sku":"FG-600ML-CA-ST","name":"Cape Aqua Still Water 600ml","price":10.0},{"sku":"FG-1L-CA-ST","name":"Cape Aqua Still Water 1L","price":14.0},{"sku":"SDR-006","name":"Coca-Cola & Fanta (300ml)","price":10.0},{"sku":"SDR-001","name":"Coca-Cola, Fanta & Stoney (440ml)","price":17.0},{"sku":"SDR-004","name":"Cold Drink (1L)","price":20.0},{"sku":"SDR-003","name":"Coca-Cola & Fanta (2L)","price":35.0},{"sku":"JUC-003","name":"Cappy Juice (500ml)","price":15.0},{"sku":"SPT-001","name":"Powerade (500ml)","price":18.0}]},{"name":"Sweets & Snacks","items":[{"sku":"SNK-004","name":"Spookies - (150g)","price":5.0},{"sku":"SNK-014","name":"Paaper Bites - (75g)","price":10.0},{"sku":"SNK-001","name":"Nik Naks - Original Cheese (20g)","price":2.0},{"sku":"SNK-012","name":"Truda Flyers","price":2.0},{"sku":"3369717","name":"Cashew Nuts 100g","price":44.0},{"sku":"3369718","name":"Choc Peanuts 100g","price":20.0},{"sku":"CRACKLES","name":"Crackles","price":12.0},{"sku":"3369724","name":"Peanuts Medium 100g","price":16.0},{"sku":"3369726","name":"Peanuts Pink N White 100g","price":22.0},{"sku":"3369728","name":"Peanuts Red Sugared 100g","price":22.0},{"sku":"3369729","name":"Popcorn 100g","price":20.0},{"sku":"3369722","name":"Fruit Lollies","price":20.0}]},{"name":"Baked Goods","items":[{"sku":"BL001","name":"Banana Loaf","price":24.0},{"sku":"ML001","name":"Marble Loaf","price":24.0},{"sku":"CL001","name":"Carrot Loaf","price":27.0},{"sku":"BR003","name":"Brownie Bites (150g)","price":20.0},{"sku":"BR001","name":"Brownie Loose","price":14.0},{"sku":"BR002","name":"Brownie Skillet (5 in A Pack)","price":39.0},{"sku":"PS001","name":"Plain Scones (3 in A Pack)","price":15.0},{"sku":"PS002","name":"Plain Scones (6 in A Pack)","price":30.0},{"sku":"CCS001","name":"Choc Chip Scones (3 in A Pack)","price":16.0},{"sku":"SJR001","name":"Swiss Jam Roll","price":30.0},{"sku":"CSR001","name":"Chocolate Swiss Roll","price":30.0},{"sku":"SJR002","name":"Mini Caramel Swiss Roll","price":30.0},{"sku":"MM001","name":"Melting Moments (7 in A Pack)","price":27.0},{"sku":"SB001","name":"Short Bread (7 in A Pack)","price":27.0},{"sku":"PDN001","name":"Pastéis de Nata (6 pack Frozen)","price":60.0},{"sku":"RUS001","name":"Rusks","price":20.0},{"sku":"SP001","name":"Sweetie Pie (4 in A Pack)","price":20.0},{"sku":"ROLL-01","name":"Single Roll","price":3.5},{"sku":"ROLL-02","name":"6 pack Rolls","price":20.0},{"sku":"MC001","name":"Milk Cups","price":15.0},{"sku":"CC001","name":"Chocolate Croissants","price":11.0}]},{"name":"Muffins","items":[{"sku":"MUF009","name":"Single Muffins - Banana","price":5.0},{"sku":"MUF002","name":"Single Muffins - Blueberry","price":5.0},{"sku":"MUF005","name":"Single Muffins - Bran & Fruit","price":5.0},{"sku":"MUF006","name":"Single Muffins - Cappuccino","price":5.0},{"sku":"MUF008","name":"Single Muffins - Carrot","price":5.0},{"sku":"MUF004","name":"Single Muffins - Choc Banana","price":5.0},{"sku":"MUF001","name":"Single Muffins - Choc Chip","price":5.0},{"sku":"MUF003","name":"Single Muffins - Choc Vanilla","price":5.0},{"sku":"MUF029","name":"Single Muffins - Chocolate","price":5.0},{"sku":"MUF007","name":"Single Muffins - Orange","price":5.0},{"sku":"MUF030","name":"Single Muffins - Vanilla","price":5.0},{"sku":"MUF018","name":"2 pack Muffins - Banana","price":10.0},{"sku":"MUF011","name":"2 pack Muffins - Blueberry","price":10.0},{"sku":"MUF014","name":"2 pack Muffins - Bran & Fruit","price":10.0},{"sku":"MUF015","name":"2 pack Muffins - Cappuccino","price":10.0},{"sku":"MUF017","name":"2 pack Muffins - Carrot","price":10.0},{"sku":"MUF013","name":"2 pack Muffins - Choc Banana","price":10.0},{"sku":"MUF010","name":"2 pack Muffins - Choc Chip","price":10.0},{"sku":"MUF012","name":"2 pack Muffins - Choc Vanilla","price":10.0},{"sku":"MUF033","name":"2 pack Muffins - Chocolate","price":10.0},{"sku":"MUF035","name":"2 pack Muffins - Marble","price":10.0},{"sku":"MUF016","name":"2 pack Muffins - Orange","price":10.0},{"sku":"MUF034","name":"2 pack Muffins - Vanilla","price":10.0},{"sku":"MUF026","name":"3 pack Muffins - Banana","price":15.0},{"sku":"MUF020","name":"3 pack Muffins - Blueberry","price":15.0},{"sku":"MUF027","name":"3 pack Muffins - Bran & Fruit","price":15.0},{"sku":"MUF023","name":"3 pack Muffins - Cappuccino","price":15.0},{"sku":"MUF025","name":"3 pack Muffins - Carrot","price":15.0},{"sku":"MUF022","name":"3 pack Muffins - Choc Banana","price":15.0},{"sku":"MUF019","name":"3 pack Muffins - Choc Chip","price":15.0},{"sku":"MUF021","name":"3 pack Muffins - Choc Vanilla","price":15.0},{"sku":"MUF031","name":"3 pack Muffins - Chocolate","price":15.0},{"sku":"MUF028","name":"3 pack Muffins - Marble","price":15.0},{"sku":"MUF024","name":"3 pack Muffins - Orange","price":15.0},{"sku":"MUF032","name":"3 pack Muffins - Vanilla","price":15.0},{"sku":"MUFX001","name":"3 Pack - Mix Muffins","price":15.0},{"sku":"MUV002","name":"Muffin Value pack (10 in A Pack) - Chocolate","price":35.0},{"sku":"MUV001","name":"Muffin Value pack (10 in A Pack) - Vanilla","price":35.0},{"sku":"MIX001","name":"2 pack Muffins - Mix Muffins","price":8.0},{"sku":"JMU009","name":"Jumbo Muffins - Banana","price":12.0},{"sku":"JMU002","name":"Jumbo Muffins - Blueberry","price":12.0},{"sku":"JMU005","name":"Jumbo Muffins - Bran & Fruit","price":12.0},{"sku":"JMU006","name":"Jumbo Muffins - Cappuccino","price":12.0},{"sku":"JMU008","name":"Jumbo Muffins - Carrot","price":12.0},{"sku":"JMU004","name":"Jumbo Muffins - Choc Banana","price":12.0},{"sku":"JMU001","name":"Jumbo Muffins - Choc Chip","price":12.0},{"sku":"JMU003","name":"Jumbo Muffins - Choc Vanilla","price":12.0},{"sku":"JMU010","name":"Jumbo Muffins - Chocolate","price":12.0},{"sku":"JMU041","name":"Jumbo Muffins - Marble","price":12.0},{"sku":"JMU007","name":"Jumbo Muffins - Orange","price":12.0}]},{"name":"Cakes & Treats","items":[{"sku":"SWISSRL","name":"Swiss Roll Logs","price":17.0},{"sku":"ECLLOG001","name":"Eclair Log","price":18.0},{"sku":"CHOCEC001","name":"Choc Eclairs - single","price":12.0},{"sku":"LAM-SIN","name":"Lamington - Single","price":8.0},{"sku":"LAMRS","name":"Lamington Raspberry (skillet)","price":30.0},{"sku":"LAMCS","name":"Lamington Chocolate (skillet)","price":30.0},{"sku":"SNOWBC001","name":"Snowball with Cream","price":10.0},{"sku":"3433214","name":"Nimbles","price":10.0}]},{"name":"Biscuits","items":[{"sku":"DB001","name":"Dipped Biscuit - Choc","price":27.0},{"sku":"DB002","name":"Dipped Biscuit - White","price":27.0},{"sku":"BIS001","name":"200g Biscuits - Choc Chip","price":17.0},{"sku":"BIS002","name":"200g Biscuits - Choc Chip Shortbread","price":17.0},{"sku":"BIS005","name":"200g Biscuits - Crunchie","price":17.0},{"sku":"BIS004","name":"200g Biscuits - Ginger","price":17.0},{"sku":"BIS003","name":"200g Biscuits - Shortbread","price":17.0},{"sku":"BIS007","name":"500g Biscuits - Choc Chip","price":35.0},{"sku":"BIS008","name":"500g Biscuits - Choc Chip Shortbread","price":35.0},{"sku":"BIS011","name":"500g Biscuits - Crunchie","price":35.0},{"sku":"BIS010","name":"500g Biscuits - Ginger","price":35.0},{"sku":"BIS009","name":"500g Biscuits - Shortbread","price":35.0},{"sku":"BIS013","name":"1Kg Biscuits - Choc Chip","price":65.0},{"sku":"BIS014","name":"1Kg Biscuits - Choc Chip Shortbread","price":65.0},{"sku":"BIS016","name":"1Kg Biscuits - Ginger","price":65.0},{"sku":"BIS015","name":"1Kg Biscuits - Shortbread","price":65.0},{"sku":"BIS018","name":"1kg Biscuits - Coconut Choc","price":65.0},{"sku":"BIS017","name":"1kg Biscuits - Crunchie","price":65.0}]},{"name":"Meds","items":[{"sku":"OTH-002","name":"Grand-Pa Headache Powders (Sachet)","price":4.0}]}]}
 ;
 
-const WHATSAPP_NUMBER = "27721142075"; // digits only, country code first
+const WHATSAPP_NUMBER = "27789517400"; // digits only, country code first
+
+// ---------- Live stock status (Google Sheet) ----------
+// Paste the "Publish to web" CSV link from the stock control sheet here once
+// it's set up. Leave blank to skip stock checking entirely (every item just
+// stays orderable, which is exactly how the site behaved before this existed).
+const STOCK_SHEET_CSV_URL = "";
+
+// Minimal CSV parser that handles quoted fields containing commas
+// (several item names do, e.g. "Vienna, Chips Roll").
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\n' || c === '\r'){
+        if(c === '\r' && text[i+1] === '\n') i++;
+        row.push(field); field = '';
+        rows.push(row); row = [];
+      } else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length > 1 || r[0] !== '');
+}
+
+function applyStockStatus(unavailableSkus){
+  MENU.groups.forEach(group => {
+    group.items.forEach(item => {
+      const isOut = unavailableSkus.has(item.sku);
+      const card = document.getElementById('card-' + item.sku);
+      if(card) card.classList.toggle('out-of-stock', isOut);
+
+      const ctrlWrap = document.getElementById('ctrl-' + item.sku);
+      if(!ctrlWrap) return;
+      if(isOut){
+        ctrlWrap.innerHTML = '<span class="sold-out-label">Sold Out</span>';
+      } else if(ctrlWrap.querySelector('.sold-out-label')){
+        // Item just came back into stock — restore its normal Add/qty control.
+        renderItemControl(ctrlWrap, item);
+      }
+    });
+  });
+}
+
+async function fetchStockStatus(){
+  if(!STOCK_SHEET_CSV_URL) return; // stock checking not configured yet
+  try{
+    const res = await fetch(STOCK_SHEET_CSV_URL, { cache: 'no-store' });
+    if(!res.ok) throw new Error('Stock sheet fetch failed: ' + res.status);
+    const text = await res.text();
+    const rows = parseCSV(text);
+    const unavailableSkus = new Set();
+    rows.forEach((row, idx) => {
+      if(idx === 0) return; // header row: SKU, Item Name, Available
+      const sku = (row[0] || '').trim();
+      const availableRaw = (row[2] || '').trim().toUpperCase();
+      const isAvailable = availableRaw === 'TRUE' || availableRaw === 'YES' || availableRaw === '1';
+      if(sku && !isAvailable) unavailableSkus.add(sku);
+    });
+    applyStockStatus(unavailableSkus);
+  } catch(e){
+    // If the sheet is unreachable for any reason, fail silently and leave
+    // every item orderable — a broken stock check should never block sales.
+    console.warn('Could not check stock status:', e);
+  }
+}
+
 
 // Sauce add-ons: available on Burgers & Rolls, Gatsby's, and Hot Chips —
 // plus any individually-added items listed in SAUCE_ELIGIBLE_EXTRA_SKUS below.
@@ -751,7 +878,21 @@ const TOPPING_ELIGIBLE_SKUS = new Set(TOPPING_ELIGIBLE_EXTRA_SKUS);
 // Flavour/variant picker: single-choice options (a bottle can only be one
 // flavour), with quantity chosen right in the same modal. sku -> flavour list.
 const VARIANT_CONFIG = {
-  "FG-600ML-FLAV": ["Naartjie", "Apple", "Passion Fruit", "Litchi"] // 600ml Cape Aqua
+  "FG-600ML-FLAV": ["Naartjie", "Apple", "Passion Fruit", "Litchi"], // 600ml Cape Aqua
+  "ENG-CANS-001": ["Ginger & Pineapple", "Tropical", "Citrus Pine", "Dry Lemon", "Iced Tea", "Cranberry & Cherry", "Vit+Zinc Lemon & Ginger"], // Switch Energy (Cans)
+  "MONE": ["Original", "Zero Sugar", "Absolutely Zero", "Ultra", "Lando Norris Edition", "VR46 Edition"], // Monster Energy
+  "SDR-006": ["Coca-Cola Original", "Fanta Orange"], // Coca-Cola & Fanta (300ml)
+  "SDR-001": ["Coca-Cola Original", "Coca-Cola Zero", "Fanta Orange", "Stoney Ginger Beer"], // Coca-Cola, Fanta & Stoney (440ml)
+  "SDR-005": ["Coca-Cola Original", "Fanta Orange", "Fanta Pineapple", "Stoney Ginger Beer"], // Coca-Cola, Fanta & Stoney (500ml)
+  "SDR-003": ["Coca-Cola Original", "Coca-Cola Original Less Sugar", "Fanta Grape", "Fanta Pineapple", "Fanta Orange"], // Coca-Cola & Fanta (2L)
+  "SPT-001": ["Mountain Blast", "Naartjie", "Lemon/Lime"], // Powerade (500ml)
+  "JUC-003": ["Cloudy Lemonade", "Orange"], // Cappy Juice (500ml)
+  "SNK-004": ["Chicken Chills", "Pele Pele", "Chutney", "BBQ Boo", "Cheesy Screams", "Sweet Chilli"], // Spookies - (150g)
+  "3172362": { // Regular Pie Special — pick any TWO pie flavours
+    options: ["Chicken and Mushroom Pie", "Chicken Mayo Pie", "Pepper Steak Pie", "Steak & Kidney Pie", "Biltong and Cheese", "Beef Rib"],
+    pickCount: 2,
+    label: "Pies"
+  }
 };
 const VARIANT_ELIGIBLE_SKUS = new Set(Object.keys(VARIANT_CONFIG));
 
@@ -813,7 +954,7 @@ function addToCart(item, sauces, toppings){
 
 // For flavour/variant items — the modal lets the customer set quantity
 // directly, so this adds that whole amount in one go rather than 1 at a time.
-function addVariantToCart(item, flavour, qty){
+function addVariantToCart(item, flavour, qty, label){
   const key = cartKeyFor(item.sku, null, null, flavour);
   if(cart[key]){
     cart[key].qty += qty;
@@ -826,6 +967,7 @@ function addVariantToCart(item, flavour, qty){
       sauces: [],
       toppings: [],
       variant: flavour,
+      variantLabel: label || 'Flavour',
       extraSauceCost: 0,
       unitPrice: item.price
     };
@@ -893,6 +1035,16 @@ function buildMenu(){
     h2.textContent = group.name;
     section.appendChild(h2);
 
+    const hasFlavourPicker = group.items.some(item =>
+      VARIANT_ELIGIBLE_SKUS.has(item.sku) || SAUCE_ELIGIBLE_SKUS.has(item.sku)
+    );
+    if(hasFlavourPicker){
+      const hint = document.createElement('p');
+      hint.className = 'category-hint';
+      hint.textContent = '💡 Tap "Add" on select items to choose a flavour & quantity.';
+      section.appendChild(hint);
+    }
+
     const grid = document.createElement('div');
     grid.className = 'item-grid';
 
@@ -924,6 +1076,7 @@ function buildMenu(){
       ctrlWrap.id = 'ctrl-' + item.sku;
       renderItemControl(ctrlWrap, item);
 
+      card.id = 'card-' + item.sku;
       card.appendChild(info);
       card.appendChild(ctrlWrap);
       grid.appendChild(card);
@@ -1145,45 +1298,130 @@ function confirmSauceModal(){
 }
 
 // ---------- Flavour / variant picker modal ----------
+// Supports two shapes in VARIANT_CONFIG:
+//   sku -> [options...]                         (pick exactly 1, radio buttons)
+//   sku -> { options, pickCount, label }         (pick exactly N total, with
+//                                                  a per-option stepper so the
+//                                                  same option can be picked
+//                                                  more than once — e.g. two
+//                                                  of the same pie flavour)
 let flavourModalItem = null;
-let flavourModalSelected = null;
+let flavourModalConfig = null; // { options, pickCount, label }
+let flavourModalSelected = null; // single string, for pickCount === 1
+let flavourModalCounts = {};     // option -> count, for pickCount > 1
 let flavourModalQty = 1;
+
+function normalizeVariantConfig(rawConfig){
+  if(Array.isArray(rawConfig)){
+    return { options: rawConfig, pickCount: 1, label: 'Flavour' };
+  }
+  return {
+    options: rawConfig.options,
+    pickCount: rawConfig.pickCount || 1,
+    label: rawConfig.label || 'Flavour'
+  };
+}
+
+function multiPickTotal(){
+  return Object.values(flavourModalCounts).reduce((s, n) => s + n, 0);
+}
 
 function openFlavourModal(item){
   flavourModalItem = item;
-  flavourModalSelected = null;
+  flavourModalConfig = normalizeVariantConfig(VARIANT_CONFIG[item.sku] || []);
   flavourModalQty = 1;
+
+  const { options, pickCount, label } = flavourModalConfig;
+  const isMultiPick = pickCount > 1;
+
+  flavourModalSelected = null;
+  flavourModalCounts = {};
+  options.forEach(o => { flavourModalCounts[o] = 0; });
 
   document.getElementById('flavourModalItemName').textContent = item.name;
   document.getElementById('flavourQtyNum').textContent = flavourModalQty;
+  document.getElementById('flavourModalTitle').textContent = isMultiPick
+    ? 'Choose Your ' + label
+    : 'Choose a Flavour';
+  document.querySelector('#flavourOverlay .sauce-hint').textContent = isMultiPick
+    ? 'Pick any ' + pickCount + ' — repeats are fine (e.g. two of the same).'
+    : 'Pick one flavour, then set how many you\'d like.';
 
-  const options = VARIANT_CONFIG[item.sku] || [];
   const list = document.getElementById('flavourOptionsList');
   list.innerHTML = '';
 
-  options.forEach(flavourName => {
-    const row = document.createElement('label');
-    row.className = 'sauce-option';
+  if(isMultiPick){
+    options.forEach(optionName => {
+      const row = document.createElement('div');
+      row.className = 'sauce-option multi-pick-row';
+      row.dataset.flavour = optionName;
 
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.name = 'flavourChoice';
-    radio.value = flavourName;
-    radio.addEventListener('change', () => {
-      flavourModalSelected = flavourName;
-      updateFlavourRowStates();
-      updateFlavourConfirmState();
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'sauce-name';
+      nameSpan.textContent = optionName;
+
+      const ctrl = document.createElement('div');
+      ctrl.className = 'multi-pick-ctrl';
+
+      const minus = document.createElement('button');
+      minus.type = 'button';
+      minus.className = 'qty-btn';
+      minus.textContent = '−';
+      minus.addEventListener('click', () => {
+        if(flavourModalCounts[optionName] <= 0) return;
+        flavourModalCounts[optionName]--;
+        updateFlavourRowStates();
+        updateFlavourConfirmState();
+      });
+
+      const countSpan = document.createElement('span');
+      countSpan.className = 'qty-num multi-pick-count';
+      countSpan.textContent = '0';
+
+      const plus = document.createElement('button');
+      plus.type = 'button';
+      plus.className = 'qty-btn';
+      plus.textContent = '+';
+      plus.addEventListener('click', () => {
+        if(multiPickTotal() >= pickCount) return; // cap reached
+        flavourModalCounts[optionName]++;
+        updateFlavourRowStates();
+        updateFlavourConfirmState();
+      });
+
+      ctrl.appendChild(minus);
+      ctrl.appendChild(countSpan);
+      ctrl.appendChild(plus);
+
+      row.appendChild(nameSpan);
+      row.appendChild(ctrl);
+      list.appendChild(row);
     });
+  } else {
+    options.forEach(optionName => {
+      const row = document.createElement('label');
+      row.className = 'sauce-option';
 
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'sauce-name';
-    nameSpan.textContent = flavourName;
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'flavourChoice';
+      radio.value = optionName;
+      radio.addEventListener('change', () => {
+        flavourModalSelected = optionName;
+        updateFlavourRowStates();
+        updateFlavourConfirmState();
+      });
 
-    row.appendChild(radio);
-    row.appendChild(nameSpan);
-    row.dataset.flavour = flavourName;
-    list.appendChild(row);
-  });
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'sauce-name';
+      nameSpan.textContent = optionName;
+
+      row.appendChild(radio);
+      row.appendChild(nameSpan);
+      row.dataset.flavour = optionName;
+      list.appendChild(row);
+    });
+  }
 
   updateFlavourRowStates();
   updateFlavourConfirmState();
@@ -1191,16 +1429,49 @@ function openFlavourModal(item){
 }
 
 function updateFlavourRowStates(){
-  document.querySelectorAll('#flavourOptionsList .sauce-option').forEach(row => {
-    row.classList.toggle('chosen', row.dataset.flavour === flavourModalSelected);
-  });
+  const { pickCount } = flavourModalConfig;
+  const isMultiPick = pickCount > 1;
+
+  if(isMultiPick){
+    const total = multiPickTotal();
+    const capReached = total >= pickCount;
+    document.querySelectorAll('#flavourOptionsList .multi-pick-row').forEach(row => {
+      const optionName = row.dataset.flavour;
+      const count = flavourModalCounts[optionName];
+      row.classList.toggle('chosen', count > 0);
+      row.querySelector('.multi-pick-count').textContent = count;
+      const buttons = row.querySelectorAll('button');
+      const minusBtn = buttons[0];
+      const plusBtn = buttons[1];
+      minusBtn.disabled = count <= 0;
+      plusBtn.disabled = capReached;
+    });
+  } else {
+    document.querySelectorAll('#flavourOptionsList .sauce-option').forEach(row => {
+      row.classList.toggle('chosen', row.dataset.flavour === flavourModalSelected);
+    });
+  }
 }
 
 function updateFlavourConfirmState(){
-  document.getElementById('confirmFlavourBtn').disabled = !flavourModalSelected;
-  document.querySelector('#flavourOverlay .foot-note').textContent = flavourModalSelected
-    ? 'Ready to add to your order.'
-    : 'Select a flavour above to continue.';
+  const { pickCount, label } = flavourModalConfig;
+  const isMultiPick = pickCount > 1;
+  const footNote = document.querySelector('#flavourOverlay .foot-note');
+
+  if(isMultiPick){
+    const total = multiPickTotal();
+    const readyToConfirm = total === pickCount;
+    document.getElementById('confirmFlavourBtn').disabled = !readyToConfirm;
+    if(readyToConfirm){
+      footNote.textContent = 'Ready to add to your order.';
+    } else {
+      footNote.textContent = 'Pick ' + (pickCount - total) + ' more ' + label.toLowerCase() + ' to continue.';
+    }
+  } else {
+    const readyToConfirm = !!flavourModalSelected;
+    document.getElementById('confirmFlavourBtn').disabled = !readyToConfirm;
+    footNote.textContent = readyToConfirm ? 'Ready to add to your order.' : 'Select a flavour above to continue.';
+  }
 }
 
 function changeFlavourQty(delta){
@@ -1211,13 +1482,32 @@ function changeFlavourQty(delta){
 function closeFlavourModal(){
   document.getElementById('flavourOverlay').classList.remove('show');
   flavourModalItem = null;
+  flavourModalConfig = null;
   flavourModalSelected = null;
+  flavourModalCounts = {};
   flavourModalQty = 1;
 }
 
 function confirmFlavourModal(){
-  if(!flavourModalItem || !flavourModalSelected) return;
-  addVariantToCart(flavourModalItem, flavourModalSelected, flavourModalQty);
+  if(!flavourModalItem || !flavourModalConfig) return;
+  const { options, pickCount, label } = flavourModalConfig;
+  const isMultiPick = pickCount > 1;
+
+  let variantText;
+  if(isMultiPick){
+    if(multiPickTotal() !== pickCount) return;
+    // Iterate in the menu's own option order, so the same net distribution
+    // always produces the same text regardless of click order.
+    variantText = options
+      .filter(o => flavourModalCounts[o] > 0)
+      .map(o => flavourModalCounts[o] > 1 ? flavourModalCounts[o] + 'x ' + o : o)
+      .join(' & ');
+  } else {
+    if(!flavourModalSelected) return;
+    variantText = flavourModalSelected;
+  }
+
+  addVariantToCart(flavourModalItem, variantText, flavourModalQty, label);
   closeFlavourModal();
   openDocket();
 }
@@ -1254,7 +1544,7 @@ function renderDocketLines(){
         variantLine.style.fontSize = '11.5px';
         variantLine.style.color = 'var(--ink-soft)';
         variantLine.style.marginTop = '2px';
-        variantLine.textContent = 'Flavour: ' + item.variant;
+        variantLine.textContent = (item.variantLabel || 'Flavour') + ': ' + item.variant;
         nameWrap.appendChild(variantLine);
       }
 
@@ -1467,7 +1757,7 @@ function buildWhatsAppMessage(){
   Object.values(cart).forEach(item => {
     lines.push(item.qty + 'x ' + item.name + '  —  ' + money(item.qty * item.unitPrice));
     if(item.variant){
-      lines.push('   Flavour: ' + item.variant);
+      lines.push('   ' + (item.variantLabel || 'Flavour') + ': ' + item.variant);
     }
     if(item.sauces && item.sauces.length > 0){
       const sauceText = item.sauces.map((s, idx) => idx === 0 ? s + ' (free)' : s + ' (+R' + EXTRA_SAUCE_PRICE + ')').join(', ');
@@ -1536,6 +1826,8 @@ document.addEventListener('DOMContentLoaded', () => {
   populatePickupTimeOptions();
   loadRememberedCustomerDetails();
   refreshDocketTab();
+  fetchStockStatus();
+  setInterval(fetchStockStatus, 120000); // re-check every 2 minutes
 
   document.getElementById('docketTab').addEventListener('click', openDocket);
   document.getElementById('docketTab').addEventListener('keypress', (e) => {
