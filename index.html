@@ -682,7 +682,7 @@
         <input type="text" id="custName" placeholder="e.g. Thabo Nkosi" autocomplete="name">
       </div>
       <div class="field">
-        <label for="custPhone">Your Phone Number</label>
+        <label for="custPhone">Your Phone Number <span class="req">*</span></label>
         <input type="tel" id="custPhone" placeholder="e.g. 082 123 4567" autocomplete="tel">
       </div>
       <div class="field">
@@ -1589,7 +1589,9 @@ function refreshDocketTab(){
   document.getElementById('tabCount').textContent = count;
   document.getElementById('tabTotal').textContent = money(cartTotal());
   tab.classList.toggle('show', count > 0);
-  document.getElementById('sendBtn').disabled = count === 0 || !document.getElementById('custName').value.trim();
+  const hasName = document.getElementById('custName').value.trim();
+  const hasPhone = document.getElementById('custPhone').value.trim();
+  document.getElementById('sendBtn').disabled = count === 0 || !hasName || !hasPhone;
 }
 
 function renderDocketLines(){
@@ -1852,7 +1854,8 @@ function buildWhatsAppMessage(){
 
 function sendOrder(){
   const name = document.getElementById('custName').value.trim();
-  if(!name || cartCount() === 0) return;
+  const phone = document.getElementById('custPhone').value.trim();
+  if(!name || !phone || cartCount() === 0) return;
 
   const message = buildWhatsAppMessage();
   const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message);
@@ -1910,6 +1913,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.target.id === 'overlay') closeDocket();
   });
   document.getElementById('custName').addEventListener('input', refreshDocketTab);
+  document.getElementById('custPhone').addEventListener('input', refreshDocketTab);
   document.getElementById('sendBtn').addEventListener('click', sendOrder);
 
   document.getElementById('closeSauceModal').addEventListener('click', closeSauceModal);
