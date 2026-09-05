@@ -528,6 +528,15 @@
     cursor:not-allowed;
   }
   .sauce-option.disabled-option input{ cursor:not-allowed; }
+  .sauce-option.sold-out-option{
+    opacity:0.45;
+    cursor:not-allowed;
+  }
+  .sauce-option.sold-out-option .sauce-name{
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .sauce-option.sold-out-option input{ cursor:not-allowed; }
   .multi-pick-row{
     justify-content:space-between;
     cursor:default;
@@ -800,7 +809,21 @@ function parseCSV(text){
   return rows.filter(r => r.length > 1 || r[0] !== '');
 }
 
+// Generates a stable, readable stock-tracking code for one flavour of one
+// variant product, e.g. "SDR-003" + "Fanta Grape" -> "SDR-003__FANTA-GRAPE".
+// Used so individual flavours (not just whole products) can be marked out
+// of stock in the same Google Sheet.
+function flavourStockSku(parentSku, optionName){
+  const slug = optionName.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return parentSku + '__' + slug;
+}
+
+// The most recently fetched set of unavailable SKUs (products AND individual
+// flavours), kept globally so the flavour picker modal can check it live.
+let currentUnavailableSkus = new Set();
+
 function applyStockStatus(unavailableSkus){
+  currentUnavailableSkus = unavailableSkus;
   MENU.groups.forEach(group => {
     group.items.forEach(item => {
       const isOut = unavailableSkus.has(item.sku);
@@ -817,6 +840,12 @@ function applyStockStatus(unavailableSkus){
       }
     });
   });
+
+  // If the flavour picker modal happens to be open when a stock refresh
+  // lands, refresh its option states too rather than leaving them stale.
+  if(flavourModalItem && document.getElementById('flavourOverlay').classList.contains('show')){
+    applyFlavourStockStates();
+  }
 }
 
 async function fetchStockStatus(){
@@ -1383,6 +1412,7 @@ function openFlavourModal(item){
       plus.className = 'qty-btn';
       plus.textContent = '+';
       plus.addEventListener('click', () => {
+        if(row.dataset.soldOut === 'true') return;
         if(multiPickTotal() >= pickCount) return; // cap reached
         flavourModalCounts[optionName]++;
         updateFlavourRowStates();
@@ -1423,9 +1453,49 @@ function openFlavourModal(item){
     });
   }
 
+  applyFlavourStockStates();
   updateFlavourRowStates();
   updateFlavourConfirmState();
   document.getElementById('flavourOverlay').classList.add('show');
+}
+
+// Marks individual flavour rows as sold out based on the latest stock fetch,
+// disabling their controls and greying them out — permanently for this
+// modal session (separate from the temporary "cap reached" disabling).
+function applyFlavourStockStates(){
+  if(!flavourModalItem || !flavourModalConfig) return;
+  const parentSku = flavourModalItem.sku;
+
+  document.querySelectorAll('#flavourOptionsList [data-flavour]').forEach(row => {
+    const optionName = row.dataset.flavour;
+    const soldOut = currentUnavailableSkus.has(flavourStockSku(parentSku, optionName));
+    row.dataset.soldOut = soldOut ? 'true' : 'false';
+    row.classList.toggle('sold-out-option', soldOut);
+
+    const nameSpan = row.querySelector('.sauce-name');
+    if(nameSpan){
+      nameSpan.textContent = soldOut ? optionName + ' (Sold Out)' : optionName;
+    }
+
+    if(row.classList.contains('multi-pick-row')){
+      const buttons = row.querySelectorAll('button');
+      if(soldOut){
+        buttons[1].disabled = true; // plus button — permanently, regardless of cap
+        // If it somehow already had a count selected before going out of
+        // stock mid-session, zero it out so it can't be confirmed.
+        if(flavourModalCounts[optionName] > 0){
+          flavourModalCounts[optionName] = 0;
+          row.querySelector('.multi-pick-count').textContent = '0';
+        }
+      }
+    } else {
+      const input = row.querySelector('input');
+      if(input) input.disabled = soldOut;
+      if(soldOut && flavourModalSelected === optionName){
+        flavourModalSelected = null;
+      }
+    }
+  });
 }
 
 function updateFlavourRowStates(){
@@ -1438,13 +1508,14 @@ function updateFlavourRowStates(){
     document.querySelectorAll('#flavourOptionsList .multi-pick-row').forEach(row => {
       const optionName = row.dataset.flavour;
       const count = flavourModalCounts[optionName];
+      const soldOut = row.dataset.soldOut === 'true';
       row.classList.toggle('chosen', count > 0);
       row.querySelector('.multi-pick-count').textContent = count;
       const buttons = row.querySelectorAll('button');
       const minusBtn = buttons[0];
       const plusBtn = buttons[1];
       minusBtn.disabled = count <= 0;
-      plusBtn.disabled = capReached;
+      plusBtn.disabled = soldOut || capReached;
     });
   } else {
     document.querySelectorAll('#flavourOptionsList .sauce-option').forEach(row => {
