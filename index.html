@@ -181,12 +181,34 @@
     font-size:15px;
     font-weight:700;
     color:var(--ink);
-    margin:20px 0 4px;
+    margin:0 0 4px;
     padding-bottom:4px;
     border-bottom:1.5px solid var(--icing);
     display:inline-block;
   }
-  .subsection-heading:first-of-type{ margin-top:12px; }
+
+  .subsection-columns{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+    margin-top:14px;
+  }
+  .subsection-column{ min-width:0; } /* allows children to shrink properly in flex/grid */
+  .subsection-column .subsection-grid{ margin-top:0; }
+
+  @media(min-width:680px){
+    .subsection-columns{
+      flex-direction:row;
+      align-items:flex-start;
+      gap:20px;
+    }
+    .subsection-column{ flex:1 1 0; }
+    /* Each side is already half-width at this breakpoint, so keep cards
+       single-column here rather than doubling up like the full-width grid does. */
+    .subsection-column .subsection-grid{
+      grid-template-columns:1fr;
+    }
+  }
 
   .item-grid{
     display:grid;
@@ -1087,24 +1109,35 @@ function buildMenu(){
 
     if(group.sections){
       // Category is split into labeled sub-sections (e.g. Half / Full),
-      // each with its own heading and its own item grid.
+      // shown as side-by-side columns on wider screens and stacked on
+      // narrow phones (a real side-by-side split is too cramped there).
       const itemsBySku = {};
       group.items.forEach(item => { itemsBySku[item.sku] = item; });
 
+      const columnsWrap = document.createElement('div');
+      columnsWrap.className = 'subsection-columns';
+
       group.sections.forEach(sub => {
+        const column = document.createElement('div');
+        column.className = 'subsection-column';
+
         const h3 = document.createElement('h3');
         h3.className = 'subsection-heading';
         h3.textContent = sub.label;
-        section.appendChild(h3);
+        column.appendChild(h3);
 
         const grid = document.createElement('div');
-        grid.className = 'item-grid';
+        grid.className = 'item-grid subsection-grid';
         sub.skus.forEach(sku => {
           const item = itemsBySku[sku];
           if(item) grid.appendChild(buildItemCard(item));
         });
-        section.appendChild(grid);
+        column.appendChild(grid);
+
+        columnsWrap.appendChild(column);
       });
+
+      section.appendChild(columnsWrap);
     } else {
       const grid = document.createElement('div');
       grid.className = 'item-grid';
